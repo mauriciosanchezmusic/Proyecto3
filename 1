@@ -1,0 +1,258 @@
+//Clase fecha
+
+#include <iostream>
+#include <stdio.h>
+
+using namespace std;
+
+class Fecha
+{
+  private:
+    int dd;
+    int mm;
+    string nombreMes;
+    int aa;
+
+  public:
+    Fecha();
+    Fecha(int,int,int);
+    //void setFecha(int, int, int);
+    int getDia();
+    string getMes();
+    int getAnio();
+}
+
+Fecha::Fecha(){
+  dd=0;
+  mm=0;
+  aa=0;
+  nombreMes="Def";
+}
+
+Fecha::Fecha(int dia, int mes, int ani){
+  dd=dia;
+  mm=mes;
+  aa=ani;
+}
+
+//void Fecha::setFecha{
+
+}
+
+int Fecha::getDia(){
+  return dd;
+}
+
+string Fecha::getMes(){
+  switch(mm)
+    {
+      case 1:
+        nombreMes="Ene";
+        break;
+      case 2:
+        nombreMes="Feb";
+        break;
+      case 3:
+        nombreMes="Mar";
+        break;
+      case 4:
+        nombreMes="Abr";
+        break;
+      case 5:
+        nombreMes="May";
+        break;
+      case 6:
+        nombreMes="Jun";
+        break;
+      case 7:
+        nombreMes="Jul";
+        break;
+      case 8:
+        nombreMes="Ago";
+        break;
+      case 9:
+        nombreMes="Sep";
+        break;
+      case 10:
+        nombreMes="Oct";
+        break;
+      case 11:
+        nombreMes="Nov";
+        break;
+      case 12:
+        nombreMes="Dic";
+        break;
+      default: nombreMes="ERROR";
+    }
+  return nombreMes;
+}
+
+int Fecha::getAnio(){
+  return aa;
+}
+
+//Clase Reserva
+#include <iostream>
+#include "Fecha.h"
+#include "Material.h"
+
+using namespace std;
+
+class Reserva
+{
+  private:
+    int idMaterial;
+    int idCliente;
+    Fecha fechaReservacion;
+
+  public:
+    Reserva();
+    Reserva(int,int,Fecha);
+    void setIdMat(int);
+    int getIdMat();
+    void setIdClien(int);
+    int getIdClien();
+    Fecha calculaFechaFinReserva(int);
+};
+
+Reserva::Reserva(){
+  idMaterial= 0;
+  idCliente= 0;
+  Fecha a(0,0,0);
+  fechaReservacion=a;
+}
+
+Reserva::Reserva(int mat, int cli, Fecha reser){
+  idMaterial= mat;
+  idCliente= cli;
+  fechaReservacion=reser;
+}
+
+void Reserva::setIdMat(int _mat){
+  idMaterial=_mat;
+}
+
+int Reserva::getIdMat(){
+  return idMaterial;
+}
+
+void Reserva::setIdClien(int _clien){
+  idCliente=_clien;
+}
+
+int Reserva::getIdClien(){
+  return idCliente;
+}
+
+Fecha Reserva::calculaFechaFinReserva(int)
+{
+
+}
+
+//clase material
+#include <iostream>
+#include <stdio.h>
+
+using namespace std;
+
+class Material
+{
+  protected:
+    int matidMaterial;
+    string titulo;
+  
+  public: 
+    Material();
+    Material(int, string);
+    void setMaterial(int);
+    int getMaterial();
+    void setTitulo(string);
+    string getTitulo();
+    virtual void muestraDatos()=0;
+    virtual int cantidadDiasPrestamo()=0;
+};
+
+Material::Material(){
+    matidMaterial=0;
+    titulo= "default";
+}
+
+Material::Material(int _idMaterial, string _titulo){
+      matidMaterial=_idMaterial;
+      titulo=_titulo;
+}
+
+void Material::setMaterial(int mate){
+  matidMaterial=mate;
+}
+
+int Material::getMaterial(){
+  return matidMaterial;
+}
+
+void Material::setTitulo(int titu){
+  titulo=titu;
+}
+
+int Material::getTitulo(){
+  return titulo;
+}
+
+//clase libro
+#include <iostream>
+#include <stdio.h>
+#include "Material.h"
+
+using namespace std;
+
+class Libro : public Material
+{
+    private:
+      int numPagina;
+      string autor;
+    
+    public:
+      Libro();
+      Libro(int, string, int, string);//clase material ->  int idMat, string titulo.
+      void setNumPag(int);
+      int getNumPag();
+      void setAutorLib(string);
+      string getAutorLib();
+      //void muestraDatos();
+      //int cantidadDiasPrestamo();
+
+};
+
+Libro::Libro() : Material() {
+  numPagina=0;
+  autor="DEF";
+}
+
+Libro::Libro(int id, string tit, int _nPag, string _aut) : Material(id,tit) {
+  numPagina=_nPag;
+  autor=_aut;
+}
+
+void Libro::setNumPag(int number){
+  numPagina=number;
+}
+
+int Libro::getNumPag(){
+  return numPagina;
+}
+
+void Libro::setAutorLib(string auNo){
+  autor=auNo;
+}
+
+string Libro::getAutorLib(){
+  return autor;
+}
+
+void Libro::muestraDatos(){
+ cout<<"IdMaterial= "<<IdMaterial<<"\t Titulo= "<<titulo<<"\t NumPagina= "<<numPagina<<"\t Autor= "<<autor;
+}
+
+int Libro::cantidadDiasPrestamo(){
+  return 7;
+}
