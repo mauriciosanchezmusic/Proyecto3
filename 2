@@ -1,0 +1,964 @@
+//main
+#include <iostream>
+#include <stdio.h>
+#include <fstream> //archivos
+#include "Reserva.h"
+
+using namespace std;
+
+int main() {
+  
+  Material* arrMaterial[30];
+  Reserva arrRese[60];
+  ifstream biblioMat, reservaciones;
+  //datos Cualquier material
+  int identifMate;
+  string idenTitu;
+  char clave;
+  int dato1;
+  string dato2;
+  //datos cualquier reservaciones
+  int dia,mes,anio,Ridmat,Ridclien;
+  //opciones menu
+  char letra;
+
+  
+
+  for (int i=0;i<30;i++){   //inicializo arrMaterial por default con cualquier material
+    arrMaterial[i]=new Disco();
+  }
+
+  biblioMat.open("Texto/Material.txt");
+  for (int i=0; !biblioMat.eof(); i++)
+  {
+    biblioMat>>identifMate>>idenTitu>>clave>>dato1>>dato2;
+
+      if (clave=='L'||clave=='l'){
+        arrMaterial[i]=new Libro(identifMate,idenTitu,dato1,dato2);
+      }
+      else if (clave=='D'||clave=='d'){
+        arrMaterial[i]=new Disco(identifMate,idenTitu,dato1,dato2);
+      }
+      else if (clave=='S'||clave=='s'){
+        arrMaterial[i]=new Software(identifMate,idenTitu,dato1,dato2);
+      }
+  }
+  
+  biblioMat.close();
+
+
+  reservaciones.open("Texto/Reserva.txt"); 
+  for (int i=0; !reservaciones.eof(); i++)
+  {
+    reservaciones>>dia>>mes>>anio>>Ridmat>>Ridclien;
+    Fecha pode(dia,mes,anio);
+    arrRese[i]=Reserva(Ridmat,Ridclien,pode);
+  }
+  reservaciones.close();
+
+  
+  do {
+  cout <<"Bienvenido a la Mauriteca"<<endl;
+  cout <<"Que operacion desea hacer?"<<endl;
+  cout <<"A -> Consulta de Materiales"<<endl;
+  cout <<"B -> Consulta de Reservaciones actuales"<<endl;
+  cout <<"C -> Consulta de reservaciones de un material dado"<<endl; 
+  cout <<"D -> Consulta de reservaciones de una fecha dada"<<endl; 
+  cout <<"E -> Hacer una reservación"<<endl;
+  cout <<"F -> Terminar"<<endl;
+  cin>>letra;
+
+  if (letra=='a'||letra=='A'){
+    for (int i=0;i<30;i++)
+  {
+      if(arrMaterial[i]->getMaterial()==0 && arrMaterial[i]->getTitulo()=="default")
+      {
+        i=29;
+      }
+      else {
+        arrMaterial[i]->muestraDatos();
+      }
+
+  }
+
+  }
+  else if (letra=='b'||letra=='B'){
+  cout <<"Inicio reservacion \t Termino reservacion \t Nombre material \t ID cliente"<<endl;
+    for (int i=0;i<60;i++)
+  {
+    if (arrRese[i].getIdMat()==0 && arrRese[i].getIdClien()==0 ){
+      i=59;
+    }
+    else
+    {
+      int salNumero=0;
+      string salTitu="Def";
+      for (int j=0;j<30;)
+              { 
+                if(arrRese[i].getIdMat()==arrMaterial[j]->getMaterial())
+                { 
+                  salNumero=arrMaterial[j]->cantidadDiasPrestamo();
+                  salTitu=arrMaterial[j]->getTitulo();
+                  j=29;
+                }
+                else
+                {
+                  j++;
+                }
+              }
+      
+      cout<<arrRese[i].getFechaReservacion().getDia()<<"/"<<arrRese[i].getFechaReservacion().getMesNom()<<"/"<<arrRese[i].getFechaReservacion().getAnio()<<"\t\t\t"<<arrRese[i].calculaFechaFinReserva(salNumero).getDia()<<"/"<<arrRese[i].calculaFechaFinReserva(salNumero).getMesNom()<<"/"<<arrRese[i].calculaFechaFinReserva(salNumero).getAnio()<<"\t\t"<<salTitu<<"\t\t\t"<<arrRese[i].getIdClien()<<endl;
+
+            
+
+    }
+
+  }
+
+  }
+  else if (letra=='c'||letra=='C'){
+    //comprobar que existe un id
+    bool comprobar=false;
+  do{
+    int idBusqueda=0;
+    cout<<"Teclea el ID del material:"<<endl;
+    cin>>idBusqueda;
+      for (int i=0;i<60;i++){
+        if (arrRese[i].getIdMat()==idBusqueda && idBusqueda!=0)
+        {
+          int salidaNumero=0;
+          string salidaTitulo="Def";
+          cout<<"Nombre Material \t Fecha Inicio R. \t Fecha Final R."<<endl;
+          
+              for (int j=0;j<30;j++)
+                  {
+                    
+                        if(arrMaterial[j]->getMaterial()==idBusqueda)
+                        { 
+                          salidaTitulo=arrMaterial[j]->getTitulo();
+                          salidaNumero=arrMaterial[j]->cantidadDiasPrestamo();
+                          j=29;
+                        }
+                        else
+                        {
+                          j++;
+                        }
+                        
+                  }
+          
+          cout<<salidaTitulo<<"\t"<<arrRese[i].getFechaReservacion().getDia()<<"/"<<arrRese[i].getFechaReservacion().getMesNom()<<"/"<<arrRese[i].getFechaReservacion().getAnio()<<"\t\t\t"<<arrRese[i].calculaFechaFinReserva(salidaNumero).getDia()<<"/"<<arrRese[i].calculaFechaFinReserva(salidaNumero).getMesNom()<<"/"<<arrRese[i].calculaFechaFinReserva(salidaNumero).getAnio()<<endl;
+          
+          
+          
+          i=59;
+          comprobar=true;
+        } 
+      }
+      for (int i=0;i<30;i++){
+          if (comprobar==true)
+          {
+            i=29;
+          }
+          else
+          {
+                if(arrMaterial[i]->getMaterial()==idBusqueda)
+                {
+                  cout<<"El material "<<arrMaterial[i]->getTitulo()<<" se encuentra disponible para reservar"<<endl;
+                  comprobar=true;
+                }
+
+            }
+          }
+      
+
+
+    } while(comprobar==false);
+}
+
+
+  else if (letra=='d'||letra=='D'){
+
+  }
+  else if (letra=='e'||letra=='E'){
+
+  }
+  else if (letra=='f'||letra=='F'){
+    cout<<"Hasta la proxima"<<endl;
+    return 0;
+  }
+      
+  } while(letra!='a'||letra!='b'||letra!='c'||letra!='d'||letra!='e'||letra!='f'||letra!='A'||letra!='B'||letra!='C'||letra!='D'||letra!='E'||letra!='F');
+
+
+
+}
+
+
+//
+fecha.h
+#include <iostream>
+#include <stdio.h>
+
+using namespace std;
+
+class Fecha
+{
+  private:
+    int dd;
+    int mm;
+    int aa;
+
+  public:
+    Fecha();
+    Fecha(int,int,int);
+    int getDia();
+    string getMesNom();
+    int getMes();
+    int getAnio();
+    Fecha operator+(int);
+    bool operator>(Fecha);
+    bool operator>=(Fecha);
+    bool operator<(Fecha);
+    bool operator<=(Fecha);
+    bool operator==(Fecha);
+    friend istream &operator>>(istream &os, Fecha &f);
+    friend ostream &operator<<(ostream &os, Fecha f);
+  
+};
+
+Fecha::Fecha(){
+  dd=0;
+  mm=0;
+  aa=0;
+}
+
+Fecha::Fecha(int dia, int mes, int ani){
+  dd=dia;
+  mm=mes;
+  aa=ani;
+}
+
+int Fecha::getDia(){
+  return dd;
+}
+
+string Fecha::getMesNom(){
+  string nombreMes;
+  switch(mm)
+    {
+      case 1:
+        nombreMes="Ene";
+        break;
+      case 2:
+        nombreMes="Feb";
+        break;
+      case 3:
+        nombreMes="Mar";
+        break;
+      case 4:
+        nombreMes="Abr";
+        break;
+      case 5:
+        nombreMes="May";
+        break;
+      case 6:
+        nombreMes="Jun";
+        break;
+      case 7:
+        nombreMes="Jul";
+        break;
+      case 8:
+        nombreMes="Ago";
+        break;
+      case 9:
+        nombreMes="Sep";
+        break;
+      case 10:
+        nombreMes="Oct";
+        break;
+      case 11:
+        nombreMes="Nov";
+        break;
+      case 12:
+        nombreMes="Dic";
+        break;
+      default: nombreMes="ERROR";
+    }
+  return nombreMes;
+}
+
+int Fecha::getMes(){
+  return mm;
+}
+
+int Fecha::getAnio(){
+  return aa;
+}
+
+Fecha Fecha::operator+(int sumDia){
+  int _dd, _mm, _aa;//creo respaldo
+  _dd=dd;
+  _mm=mm;
+  _aa=aa;
+  if (dd>=1||dd<=21){
+    _dd=_dd+sumDia;
+    Fecha FeEntrega(_dd,_mm,_aa);
+    return FeEntrega;
+  }
+}
+
+bool Fecha::operator>(Fecha comp1){
+  if (aa>comp1.getAnio()){
+      if (mm>comp1.getMes()){
+            if (dd>comp1.getDia())
+            {
+                return true;
+            }
+      }
+  }
+  return false;
+}
+
+bool Fecha::operator>=(Fecha comp2){
+  if (aa>=comp2.getAnio()){
+      if (mm>=comp2.getMes()){
+            if (dd>=comp2.getDia())
+            {
+                return true;
+            }
+      }
+  }
+  return false;
+}
+
+bool Fecha::operator<(Fecha comp3){
+  if (aa<comp3.getAnio()){
+      if (mm<comp3.getMes()){
+            if (dd<comp3.getDia())
+            {
+                return true;
+            }
+      }
+  }
+  return false;
+}
+
+bool Fecha::operator<=(Fecha comp4){
+  if (aa<=comp4.getAnio()){
+      if (mm<=comp4.getMes()){
+            if (dd<=comp4.getDia())
+            {
+                return true;
+            }
+      }
+  }
+  return false;
+}
+
+bool Fecha::operator==(Fecha comp5){
+  if (aa==comp5.getAnio()){
+      if (mm==comp5.getMes()){
+            if (dd==comp5.getDia())
+            {
+                return true;
+            }
+      }
+  }
+  return false;
+}
+
+istream &operator >>(istream &os, Fecha &f){
+  cout<<"Dia: ";
+  os>>f.dd;
+  cout<<"Mes: ";
+  os>>f.mm;
+  cout<<"Anio: ";
+  os>>f.aa;
+  return os;
+  
+}
+
+ostream &operator<<(ostream &os, Fecha f){
+  os<<f.dd;//ojo aqui, podria ser .dd
+  os<<"/"<<f.mm;//ojo aqui, podria ser .mm
+  os<<"/"<<f.aa;//ojo aqui, podria ser .aa
+}
+
+
+//material.h
+#include <iostream>
+#include <stdio.h>
+
+using namespace std;
+
+class Material
+{
+  protected:
+    int matidMaterial;
+    string titulo;
+  
+  public: 
+    Material();
+    Material(int, string);
+    void setMaterial(int);
+    int getMaterial();
+    void setTitulo(string);
+    string getTitulo();
+    virtual void muestraDatos()=0;
+    virtual int cantidadDiasPrestamo()=0;
+};
+
+Material::Material(){
+    matidMaterial=0;
+    titulo= "default";
+}
+
+Material::Material(int _idMaterial, string _titulo){
+      matidMaterial=_idMaterial;
+      titulo=_titulo;
+}
+
+void Material::setMaterial(int mate){
+  matidMaterial=mate;
+}
+
+int Material::getMaterial(){
+  return matidMaterial;
+}
+
+void Material::setTitulo(string titu){
+  titulo=titu;
+}
+
+string Material::getTitulo(){
+  return titulo;
+}
+
+//clase disco
+class Disco : public Material
+{
+    private:
+      int duracion;
+      string genero;
+    
+    public:
+      Disco();
+      Disco(int, string, int, string);//clase material ->  int idMat, string titulo.
+      void setDuracion(int);
+      int getDuracion();
+      void setGenero(string);
+      string getGenero();
+      void muestraDatos();
+      int cantidadDiasPrestamo();
+
+};
+
+Disco::Disco() : Material() {
+  duracion=0;
+  genero="DEF";
+}
+
+Disco::Disco(int id, string tit, int _dura, string _gene) : Material(id,tit) {
+  duracion=_dura;
+  genero=_gene;
+}
+
+void Disco::setDuracion(int nminu){
+  duracion=nminu;
+}
+
+int Disco::getDuracion(){
+  return duracion;
+}
+
+void Disco::setGenero(string ngene){
+  genero=ngene;
+}
+
+string Disco::getGenero(){
+  return genero;
+}
+
+void Disco::muestraDatos(){
+  cout<<"Tipo de contenido: Disco"<<endl;
+ cout<<"IdMaterial= "<<matidMaterial<<"\t Titulo= "<<titulo<<"\t Duracion= "<<duracion<<"\t Genero= "<<genero<<endl;
+}
+
+int Disco::cantidadDiasPrestamo(){
+  return 2;
+}
+
+
+//clase libro
+class Libro : public Material
+{
+    private:
+      int numPagina;
+      string autor;
+    
+    public:
+      Libro();
+      Libro(int, string, int, string);//clase material ->  int idMat, string titulo.
+      void setNumPag(int);
+      int getNumPag();
+      void setAutorLib(string);
+      string getAutorLib();
+      void muestraDatos();
+      int cantidadDiasPrestamo();
+
+};
+
+Libro::Libro() : Material() {
+  numPagina=0;
+  autor="DEF";
+}
+
+Libro::Libro(int id, string tit, int _nPag, string _aut) : Material(id,tit) {
+  numPagina=_nPag;
+  autor=_aut;
+}
+
+void Libro::setNumPag(int number){
+  numPagina=number;
+}
+
+int Libro::getNumPag(){
+  return numPagina;
+}
+
+void Libro::setAutorLib(string auNo){
+  autor=auNo;
+}
+
+string Libro::getAutorLib(){
+  return autor;
+}
+
+void Libro::muestraDatos(){
+  cout<<"Tipo de contenido: Libro"<<endl;
+ cout<<"IdMaterial= "<<matidMaterial<<"\t Titulo= "<<titulo<<"\t NumPagina= "<<numPagina<<"\t Autor= "<<autor<<endl;
+}
+
+int Libro::cantidadDiasPrestamo(){
+  return 7;
+}
+
+
+//clase software
+class Software : public Material
+{
+    private:
+      int version;
+      string so;
+    
+    public:
+      Software();
+      Software(int, string, int, string);//clase material ->  int idMat, string titulo.
+      void setVersion(int);
+      int getVersion();
+      void setSo(string);
+      string getSo();
+      void muestraDatos();
+      int cantidadDiasPrestamo();
+
+};
+
+Software::Software() : Material() {
+  version=0;
+  so="DEF";
+}
+
+Software::Software(int id, string tit, int _ver, string _so) : Material(id,tit) {
+  version=_ver;
+  so=_so;
+}
+
+void Software::setVersion(int nver){
+  version=nver;
+}
+
+int Software::getVersion(){
+  return version;
+}
+
+void Software::setSo(string nso){
+  so=nso;
+}
+
+string Software::getSo(){
+  return so;
+}
+
+void Software::muestraDatos(){
+  cout<<"Tipo de contenido: Software"<<endl;
+ cout<<"IdMaterial= "<<matidMaterial<<"\t Titulo= "<<titulo<<"\t Version= "<<version<<"\t SO= "<<so<<endl;
+}
+
+int Software::cantidadDiasPrestamo(){
+  return 1;
+}
+
+
+//reserva
+#include <iostream>
+#include <stdio.h>
+#include "Fecha.h"
+#include "Material.h"
+
+using namespace std;
+
+class Reserva
+{
+  private:
+    int idMaterial;
+    int idCliente;
+    Fecha fechaReservacion;
+
+  public:
+    Reserva();
+    Reserva(int,int,Fecha);
+    void setIdMat(int);
+    int getIdMat();
+    void setIdClien(int);
+    int getIdClien();
+    void setFechaReservacion(Fecha);
+    Fecha getFechaReservacion();
+    Fecha calculaFechaFinReserva(int);
+};
+
+Reserva::Reserva(){
+  idMaterial= 0;
+  idCliente= 0;
+  Fecha a(0,0,0);
+  fechaReservacion=a;
+}
+
+Reserva::Reserva(int mat, int cli, Fecha reser){
+  idMaterial= mat;
+  idCliente= cli;
+  fechaReservacion=reser;
+}
+
+void Reserva::setIdMat(int _mat){
+  idMaterial=_mat;
+}
+
+int Reserva::getIdMat(){
+  return idMaterial;
+}
+
+void Reserva::setIdClien(int _clien){
+  idCliente=_clien;
+}
+
+int Reserva::getIdClien(){
+  return idCliente;
+}
+
+
+void Reserva::setFechaReservacion(Fecha nFecha){
+  int ndia,nmes,nanio;
+  ndia=nFecha.getDia();
+  nmes=nFecha.getMes();
+  nanio=nFecha.getAnio();
+  Fecha fn(ndia,nmes,nanio);
+  fechaReservacion=fn;
+}
+
+Fecha Reserva::getFechaReservacion(){
+  return fechaReservacion;
+}
+
+
+Fecha Reserva::calculaFechaFinReserva(int suma)
+{
+  Fecha entrega(0,0,0);
+  entrega=fechaReservacion; //hago un respaldo de fechaReservacion
+  int entDia, entMes, entAnio;
+  entDia=entrega.getDia();
+  entMes=entrega.getMes();
+  entAnio=entrega.getAnio();
+
+  if(suma==1){
+      if (entrega.getMes()==1||entrega.getMes()==3||entrega.getMes()==5||entrega.getMes()==7||entrega.getMes()==8||entrega.getMes()==10)//limite 31
+      {
+            if(entrega.getDia()!=31)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entMes=entMes+1;
+              entDia=1;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      
+      }
+      if (entrega.getMes()==12)//limite 31 pero cambio año
+      {
+            if(entrega.getDia()!=31)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entAnio=entAnio+1;
+              entDia=1;
+              entMes=1;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      }
+      if (entrega.getMes()==4||entrega.getMes()==6||entrega.getMes()==9||entrega.getMes()==11)//limite 30
+      {
+            if(entrega.getDia()!=30)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entMes=entMes+1;
+              entDia=1;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      
+      }
+      if (entrega.getMes()==2) //varia 29 y 28
+      {
+            if ((entrega.getAnio()%4)==0)
+            {
+                  if(entrega.getDia()!=29)
+                  {
+                    entDia=entDia+suma;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+                  else
+                  {
+                    entMes=entMes+1;
+                    entDia=1;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+
+            }
+            else
+            {
+                  if(entrega.getDia()!=28)
+                  {
+                    entDia=entDia+suma;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+                  else
+                  {
+                    entMes=entMes+1;
+                    entDia=1;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+
+            }
+
+      }
+      
+
+  }
+
+  if(suma==2){
+      if (entrega.getMes()==1||entrega.getMes()==3||entrega.getMes()==5||entrega.getMes()==7||entrega.getMes()==8||entrega.getMes()==10)//limite 31
+      {
+            if(entrega.getDia()<=29)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entMes=entMes+1;
+              entDia=(entDia+suma)-31;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      
+      }
+      if (entrega.getMes()==12)//limite 31 pero cambio año
+      {
+            if(entrega.getDia()<=29)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entAnio=entAnio+1;
+              entMes=1;
+              entDia=(entDia+suma)-31;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      }
+      if (entrega.getMes()==4||entrega.getMes()==6||entrega.getMes()==9||entrega.getMes()==11)//limite 30
+      {
+            if(entrega.getDia()<=28)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entMes=entMes+1;
+              entDia=(entDia+suma)-30;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      
+      }
+      if (entrega.getMes()==2) //varia 29 y 28
+      {
+            if ((entrega.getAnio()%4)==0)
+            {
+                  if(entrega.getDia()<=27)
+                  {
+                    entDia=entDia+suma;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+                  else
+                  {
+                    entMes=entMes+1;
+                    entDia=(entDia+suma)-29;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+
+            }
+            else
+            {
+                  if(entrega.getDia()<=26)
+                  {
+                    entDia=entDia+suma;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+                  else
+                  {
+                    entMes=entMes+1;
+                    entDia=(entDia+suma)-28;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+
+            }
+
+      }
+      
+
+  }
+
+  if(suma==7){
+      if (entrega.getMes()==1||entrega.getMes()==3||entrega.getMes()==5||entrega.getMes()==7||entrega.getMes()==8||entrega.getMes()==10)//limite 31
+      {
+            if(entrega.getDia()<=24)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entMes=entMes+1;
+              entDia=(entDia+suma)-31;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      
+      }
+      if (entrega.getMes()==12)//limite 31 pero cambio año
+      {
+            if(entrega.getDia()<=24)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entAnio=entAnio+1;
+              entMes=1;
+              entDia=(entDia+suma)-31;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      }
+      if (entrega.getMes()==4||entrega.getMes()==6||entrega.getMes()==9||entrega.getMes()==11)//limite 30
+      {
+            if(entrega.getDia()<=23)
+            {
+              entDia=entDia+suma;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+            else
+            {
+              entMes=entMes+1;
+              entDia=(entDia+suma)-30;
+              Fecha sale(entDia,entMes,entAnio);
+              return sale;
+            }
+      
+      }
+      if (entrega.getMes()==2) //varia 29 y 28
+      {
+            if ((entrega.getAnio()%4)==0)
+            {
+                  if(entrega.getDia()<=22)
+                  {
+                    entDia=entDia+suma;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+                  else
+                  {
+                    entMes=entMes+1;
+                    entDia=(entDia+suma)-29;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+
+            }
+            else
+            {
+                  if(entrega.getDia()<=21)
+                  {
+                    entDia=entDia+suma;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+                  else
+                  {
+                    entMes=entMes+1;
+                    entDia=(entDia+suma)-28;
+                    Fecha sale(entDia,entMes,entAnio);
+                    return sale;
+                  }
+
+            }
+
+      }
+      
+
+  }
+
+}
